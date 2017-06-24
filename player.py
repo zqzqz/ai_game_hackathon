@@ -133,7 +133,7 @@ class player(object):
             self.imgRequest.request()
             return 1
 
-    def auto_choice(self):  #use api here
+    def auto_choice(self,rival):  #use api here
         #select computer's win rate from database
         selectstr="%"
         for card in self.sortedcards:
@@ -141,6 +141,12 @@ class player(object):
         dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
         rate = dbcursor.fetchall()
         print("computer rate  ",rate)
+        
+        #select human's  win rate (one known card)
+        selectstr = "%"+transfer(rival.cards[0])+"%"
+        dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
+        rivalrate = dbcursor.fetchall()
+        print("computer rate  ",rivalrate)
         
         return 1
 
@@ -194,7 +200,7 @@ def round(human, computer):
 
     if computer.cards[0][1] > human.cards[0][1]:
         order_flag = 0
-        if computer.auto_choice()== False:
+        if computer.auto_choice(human)== False:
             win_flag = 1
         elif human.choice()== False :
             win_flag = 0
@@ -202,7 +208,7 @@ def round(human, computer):
         order_flag = 1
         if human.choice()== False :
             win_flag = 0
-        elif computer.auto_choice()== False :
+        elif computer.auto_choice(human)== False :
             win_flag = 1
 
     round_num+=1
@@ -215,7 +221,7 @@ def round(human, computer):
         print_cards(human, computer)
         if not order_flag:
             order_flag = 0
-            if computer.auto_choice() == False:
+            if computer.auto_choice(human) == False:
                 win_flag = 1
             elif human.choice() == False:
                 win_flag = 0
@@ -223,7 +229,7 @@ def round(human, computer):
             order_flag = 1
             if human.choice() == False:
                 win_flag = 0
-            elif computer.auto_choice() == False:
+            elif computer.auto_choice(human) == False:
                 win_flag = 1
 
         round_num += 1
