@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from __future__ import print_function
+
+suit = ["梅花","黑桃","方片","红桃"]
+val  = ["-1","-1","2","3","4","5","6","7","8","9","10","J","Q","K","A"]
+scorelist=["大同花顺", "同花顺", "四条", "葫芦", "同花", "顺子", "三条", "两对", "一对", "高牌"]
+
 def flush(obj):
     tmp = obj.sortedcards[0][0]
     for i in obj.sortedcards:
@@ -13,8 +21,6 @@ def straight(obj):
         else:
             tmp = obj.sortedcards[i][1]
     return 1
-
-
 
 def score(obj):
     flush_flag = flush(obj)
@@ -55,16 +61,25 @@ def tie(score, computer, human):
 
 
 def decidewinner(computer, human):
-    # return 1 human wins
-    # print("sorted cards")
+    # return 1 when human wins
+    print("### sorted cards")
     # print(computer.sortedcards)
     # print(human.sortedcards)
     human_score = score(human)
     computer_score = score(computer)
+    computer_card_string = ""
+    human_card_string = ""
 
-    scorelist=["大同花顺", "同花顺", "四条", "葫芦", "同花", "顺子", "三条", "两对", "一对", "高牌"]
-    #print("human: ", scorelist[human_score])
-    #print("computer: ", scorelist[computer_score])
+    # explicitly show the all cards of computer and human
+    for it in computer.sortedcards:
+        computer_card_string += suit[it[0]] + " " + val[it[1]]+"\t"
+    print("computer's cards:   %s" %(computer_card_string))
+    for it in human.sortedcards:
+        human_card_string += suit[it[0]] + " " + val[it[1]]+"\t"
+    print("human's cards:      %s" %(human_card_string))
+    
+    print("human: ", scorelist[human_score])
+    print("computer: ", scorelist[computer_score])
 
     if human_score == computer_score:
         return tie(score, computer, human)
