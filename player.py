@@ -98,6 +98,7 @@ class player(object):
         self.cards = []
         self.sortedcards = []
         self.imgRequest = request_arg
+        self.rivalrate = 0
 
     def setname(self, str):
         self.name = str
@@ -133,23 +134,23 @@ class player(object):
             self.imgRequest.request()
             return 1
 
-    def auto_choice(self,rival):  #use api here
+    def auto_choice(self):  #use api here
         #select computer's win rate from database
         selectstr="%"
         for card in self.sortedcards:
             selectstr = selectstr+transfer(card)+"%"
         dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
-        rate = dbcursor.fetchall()
+        rate = dbcursor.fetchall()[0][0]
         print("computer rate  ",rate)
         
+        return 1
+    
+    def select_rival_rate(self, rival):
         #select human's  win rate (one known card)
         selectstr = "%"+transfer(rival.cards[0])+"%"
         dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
-        rivalrate = dbcursor.fetchall()
-        print("computer rate  ",rivalrate)
-        
-        return 1
-
+        self.rivalrate = dbcursor.fetchall()[0][0]
+        print("human rate  ", self.rivalrate)
 
     def printcards(self):
         flag = True
@@ -198,9 +199,12 @@ def round(human, computer):
 
     print_cards(human, computer)
 
+    #computer calculate human's win rate
+    computer.select_rival_rate(human)
+    
     if computer.cards[0][1] > human.cards[0][1]:
         order_flag = 0
-        if computer.auto_choice(human)== False:
+        if computer.auto_choice()== False:
             win_flag = 1
         elif human.choice()== False :
             win_flag = 0
@@ -208,7 +212,7 @@ def round(human, computer):
         order_flag = 1
         if human.choice()== False :
             win_flag = 0
-        elif computer.auto_choice(human)== False :
+        elif computer.auto_choice()== False :
             win_flag = 1
 
     round_num+=1
@@ -221,7 +225,7 @@ def round(human, computer):
         print_cards(human, computer)
         if not order_flag:
             order_flag = 0
-            if computer.auto_choice(human) == False:
+            if computer.auto_choice() == False:
                 win_flag = 1
             elif human.choice() == False:
                 win_flag = 0
@@ -229,7 +233,7 @@ def round(human, computer):
             order_flag = 1
             if human.choice() == False:
                 win_flag = 0
-            elif computer.auto_choice(human) == False:
+            elif computer.auto_choice() == False:
                 win_flag = 1
 
         round_num += 1
