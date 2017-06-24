@@ -1,7 +1,11 @@
-#!/usr/bin/env python
+#!/usr/local/bin/python
 # -*- coding:utf-8 -*-
 
 from player import *
+
+
+cap = cv2.VideoCapture(0)
+windowSize = (480, 270)
 
 def video_loop():
     global frame
@@ -13,11 +17,11 @@ def video_loop():
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        cap.release()
+    cap.release()
     cv2.destroyAllWindows()
     exit(0)
 
-def main():
+def game():
     global list
     initial()
     human = player()
@@ -44,4 +48,7 @@ def main():
 if __name__ == '__main__':
     cv2.namedWindow('requested', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('requested', windowSize[0], windowSize[1])
-    main()
+    game_thread = threading.Thread(group=None, target=game)
+    game_thread.start()
+    video_loop()
+    # main()

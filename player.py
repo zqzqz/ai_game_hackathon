@@ -15,7 +15,6 @@ from judge import *
 
 
 global frame
-windowSize = (480, 270)
 
 lock = threading.Lock()
 
@@ -58,11 +57,10 @@ def addScores(img, scores, color, x, y):
 
 
 def request():
-    # lock.acquire()
-    cap = cv2.VideoCapture(0)
-    ret, frame = cap.read()
+    global frame
+    lock.acquire()
     img = frame
-    # lock.release()
+    lock.release()
     imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     ret, imgJPG = cv2.imencode(".jpg", imgRGB)
     cap.release()
