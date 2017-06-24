@@ -14,10 +14,6 @@ from random import randint
 from judge import *
 
 
-global frame
-
-lock = threading.Lock()
-
 headers = {
     # Request headers
     'Content-Type': 'application/octet-stream',
@@ -56,38 +52,34 @@ def addScores(img, scores, color, x, y):
     cv2.putText(img, "happiness: " + str(happiness), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
 
-def request():
-    global frame
-    lock.acquire()
-    img = frame
-    lock.release()
-    imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    ret, imgJPG = cv2.imencode(".jpg", imgRGB)
-    cap.release()
-    # if (not ret):
-        #print("frame encode error!")
-    try:
-        conn.request("POST", "/emotion/v1.0/recognize?%s" % params, imgJPG, headers)
-        response = conn.getresponse()
-        face_data = response.read()
-        # print("emotion: " + face_data)
-    except Exception as e:
-        # print e
-        traceback.print_exc()
-        print("[Errno {0}] {1}".format(e.errno, e.strerror))
-        exit(1)
-    people_info = json.loads(face_data)
-    index = 0
-    for p in people_info:
-        rectangle = p['faceRectangle']
-        scores = p['scores']
-        addRectangle(img, rectangle, scores, index)
-        print("[%d]: %s" %(index, scores))
-        index = index + 1
+class ImgRequest(object):
 
-    # cv2.imshow("requested", img)
-    # cv2.waitKey(100)
-    # threading.Timer(5, request).start()
+    def request(self):
+        imgRGB = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+        ret, imgJPG = cv2.imencode(".jpg", imgRGB)
+        # if (not ret):
+            #print("frame encode error!")
+        try:
+            conn.request("POST", "/emotion/v1.0/recognize?%s" % params, imgJPG, headers)
+            response = conn.getresponse()
+            face_data = response.read()
+            # print("emotion: " + face_data)
+        except Exception as e:
+            traceback.print_exc()
+            print("[Errno {0}] {1}".format(e.errno, e.strerror))
+            exit(1)
+        people_info = json.loads(face_data)
+        index = 0
+        for p in people_info:
+            rectangle = p['faceRectangle']
+            scores = p['scores']
+            addRectangle(self.frame, rectangle, scores, index)
+            print("[%d]: %s" %(index, scores))
+            index = index + 1
+        cv2.imshow("requested", self.frame)
+
+    def setFrame(self, frame):
+        self.frame = frame
 
 def initial():
     global list
@@ -97,10 +89,12 @@ def initial():
 
 
 class player(object):
-    def __init__(self):
+    def __init__(self, request_arg=None):
         self.name = 'Unnamed'
         self.cards = []
         self.sortedcards = []
+        self.imgRequest = request_arg
+
     def setname(self, str):
         self.name = str
     def fetch(self):
@@ -132,7 +126,7 @@ class player(object):
         else:
             # human fetch a card, analyze his emotion
             print("send photo as request")
-            request()
+            self.imgRequest.request()
             return 1
 
     def auto_choice(self):  #use api here

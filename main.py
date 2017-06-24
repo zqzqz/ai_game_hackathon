@@ -3,17 +3,20 @@
 
 from player import *
 
+lock = threading.Lock()
 
 cap = cv2.VideoCapture(0)
 windowSize = (480, 270)
 
+imgRequest = ImgRequest()
+
+
 def video_loop():
     global frame
     while True:
-        lock.acquire()
         ret, frame = cap.read()
         frame = cv2.resize(frame, windowSize)
-        lock.release()
+        imgRequest.setFrame(frame)
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -22,18 +25,18 @@ def video_loop():
     exit(0)
 
 def game():
-    global list
+    global frame
     initial()
-    human = player()
+    human = player(request_arg=imgRequest)
     human.setname('player')
     computer = player()
     computer.setname('computer')
     r_int = 0
-    while 1:
+    while(True):
         r_int = r_int + 1
         x = raw_input(">>>: enter to begin")
         print "============================================= " 
-        print "### round ", r_int, " begins" 
+        print "### round ", r_int, " begins"
         win_flag, round_num = round(human, computer)
         if win_flag:
             print "### human wins!" 
