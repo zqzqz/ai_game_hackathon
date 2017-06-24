@@ -12,7 +12,11 @@ import json
 import traceback
 from random import randint
 from judge import *
+import sqlite3
 
+#connect database
+db = sqlite3.connect("test.db")
+dbcursor = db.cursor()
 
 headers = {
     # Request headers
@@ -130,6 +134,14 @@ class player(object):
             return 1
 
     def auto_choice(self):  #use api here
+        #select computer's win rate from database
+        selectstr="%"
+        for card in self.sortedcards:
+            selectstr = selectstr+transfer(card)+"%"
+        dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
+        rate = dbcursor.fetchall()
+        print("computer rate  ",rate)
+        
         return 1
 
 
