@@ -6,6 +6,9 @@ suit = ["梅花","黑桃","方片","红桃"]
 val  = ["-1","-1","2","3","4","5","6","7","8","9","10","J","Q","K","A"]
 scorelist=["大同花顺", "同花顺", "四条", "葫芦", "同花", "顺子", "三条", "两对", "一对", "高牌"]
 
+def speak(text):
+    print("hello world")
+
 def flush(obj):
     tmp = obj.sortedcards[0][0]
     for i in obj.sortedcards:

@@ -41,26 +41,16 @@ except Exception as e:
 
 list = []
 currentlist=[]
-fixlist=[]
+fixList = []
 
-def setFixlist(n):
-    global fixlist
-    fixlist=[]
-    if n==0:
-	#computer wins
-	fixlist=[(0,1),(2,9),(3,1),(2,7),(0,12),(1,6),(3,3),(1,11),(2,12),(1,5)]
-    elif n==1:
-	#tie but human slightly win
-        fixlist=[(1,8),(2,6),(2,9),(3,3),(0,5),(0,10),(0,11),(1,11),(0,2),(0,14)]
+def setFixList(n):
+    global fixList
+    if n==1:
+        fixList = [(0,1), (2,9), (3,1), (2,7), (0,12), (1,6), (3,3), (1,11), (2,12), (1,5)]
     elif n==2:
-        #human wins
-        fixlist[(0,11),(1,3),(1,6),(2,8),(0,3),(0,5),(0,12),(2,3),(0,13),(0,8)]
-    else:
-    	for i in range(4):
-            for j in range(2,15):
-           	fixlist.append((i,j))
-	 
-	
+        fixList = [(1,8), (2,6), (2,9), (3,3), (0,5), (0,10), (0,11), (1,11), (0,2), (0,14)]
+    elif n==3:
+        fixList = [(0,11), (1,3), (1,6), (2,8), (0,3), (0,5), (0,12), (2,3), (0,13), (0,8)]
 
 def addRectangle(img, rectangle, scores, index):
     color = colorBGR[index % len(colorBGR)]
@@ -126,16 +116,40 @@ def initial():
 
 
 class player(object):
+
     def __init__(self, request_arg=None):
         self.name = 'Unnamed'
         self.cards = []
         self.sortedcards = []
         self.imgRequest = request_arg
+<<<<<<< HEAD
         self.rivalrate = 0
+=======
+        self.emotion = {"sadness": 0, "fear": 0, "disgust": 0, \
+                        "surprise": 0, "happiness": 0, "neutral": 0}
+        self.update = False
+>>>>>>> d019ea65dda189479701ee90634f1f6482ac0328
 
     def setname(self, str):
         self.name = str
 
+<<<<<<< HEAD
+=======
+    def fetchFixed(self):
+        global fixList
+        nextCard = fixList[0]
+        del fixList[0]
+        self.cards.append(nextCard)
+
+        length = len(self.sortedcards)
+        for k in range(length):
+            if nextCard[1] >= self.sortedcards[k][1]:
+                self.sortedcards.insert(k, nextCard)
+                break
+        if length == len(self.sortedcards):
+            self.sortedcards.append(nextCard)
+
+>>>>>>> d019ea65dda189479701ee90634f1f6482ac0328
     def fetch(self):
         global currentlist
         # print(currentlist)
@@ -229,18 +243,36 @@ def print_cards (human, computer):
     human.printcards()
     print()
 
+<<<<<<< HEAD
 def round(human, computer, r_int):
     global currentlist
+=======
+def round(human, computer, round_num):
+    global list, currentlist
+    # initial()
+    setFixList(round_num)
+>>>>>>> d019ea65dda189479701ee90634f1f6482ac0328
     win_flag = -1
     round_num = 0
 
     setFixlist(r_int)
     currentlist = list
+<<<<<<< HEAD
     computer.fetch1()
     human.fetch1()
     computer.fetch1()
 
     human.fetch1()
+=======
+    computer.fetchFixed()
+    human.fetchFixed()
+    computer.fetchFixed()
+    human.fetchFixed()
+    # computer.fetch()
+    # human.fetch()
+    # computer.fetch()
+    # human.fetch()
+>>>>>>> d019ea65dda189479701ee90634f1f6482ac0328
 
     print_cards(human, computer)
 
@@ -265,8 +297,15 @@ def round(human, computer, r_int):
         return (win_flag, round_num)
 
     for k in range(3):
+<<<<<<< HEAD
         computer.fetch1()
         human.fetch1()
+=======
+        computer.fetchFixed()
+        human.fetchFixed()
+        # computer.fetch()
+        # human.fetch()
+>>>>>>> d019ea65dda189479701ee90634f1f6482ac0328
         print_cards(human, computer)
         if not order_flag:
             order_flag = 0
