@@ -110,16 +110,17 @@ def evaluateEmotion(scores):
     disgust = scores['disgust']
     anger = scores['anger']
     fear = scores['fear']
-    max_emotion = max(scores, key=scores.get)
-    max_score = scores[max_emotion]
-    if (max_score < 0.1):
+    if (max([happiness, surprise, sadness, contempt, disgust, anger, fear]) < 0.1):
+        speak("很好！你有一张扑克脸")
         return 3
-    if (happiness > 0.2):
+    if (happiness > 0.7):
         speak("不要以为你要赢了！")
         return 5
     if (happiness > 0.2):
+        speak("你很有自信")
         return 4
-    if (surprise > 0.1 and (anger > 0.2 or disgust > 0.2 or fear > 0.2 or contempt > 0.2)):
+    if (surprise > 0.1 and (anger > 0.15 or disgust > 0.2 or fear > 0.2 or contempt > 0.2)):
+        speak("惊不惊喜？意不意外？")
         return 1
     if (sadness > 0.2):
         speak("你这个菜鸡！")
