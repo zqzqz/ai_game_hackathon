@@ -24,8 +24,7 @@ params = urllib.urlencode({
     # Request parameters
 })
 
-colorBGR = [(255,0,0), (0,255,0), (0,0,255)]
-textBGR = (255,0,0)
+colorBGR = [(105, 140, 255), (255, 144, 30), (140, 199, 0), (60, 20, 220), (2, 255, 255)]
 recThickness = 2
 
 try:
