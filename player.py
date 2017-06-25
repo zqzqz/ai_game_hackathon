@@ -243,27 +243,15 @@ def print_cards (human, computer):
     human.printcards()
     print()
 
-<<<<<<< HEAD
-def round(human, computer, r_int):
-    global currentlist
-=======
 def round(human, computer, round_num):
     global list, currentlist
     # initial()
     setFixList(round_num)
->>>>>>> d019ea65dda189479701ee90634f1f6482ac0328
     win_flag = -1
     round_num = 0
 
     setFixlist(r_int)
     currentlist = list
-<<<<<<< HEAD
-    computer.fetch1()
-    human.fetch1()
-    computer.fetch1()
-
-    human.fetch1()
-=======
     computer.fetchFixed()
     human.fetchFixed()
     computer.fetchFixed()
