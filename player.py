@@ -48,8 +48,15 @@ def addRectangle(img, rectangle, scores, index):
     addScores(img, scores, color, left, top - 5)
 
 def addScores(img, scores, color, x, y):
+    neutral = scores['neutral']
     happiness = scores['happiness']
-    cv2.putText(img, "happiness: " + str(happiness), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
+    scores.pop('neutral', None)
+    max_emotion = max(scores, key=scores.get)
+    max_score = scores[max_emotion]
+    if (max_score < 0.1):
+        max_emotion = 'neutral'
+        max_score = neutral
+    cv2.putText(img, max_emotion + ": " + str(max_score), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
 
 class ImgRequest(object):
