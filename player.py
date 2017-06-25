@@ -73,8 +73,6 @@ class ImgRequest(object):
     
         imgRGB = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
         ret, imgJPG = cv2.imencode(".jpg", imgRGB)
-        # if (not ret):
-            #print("frame encode error!")
         try:
             conn.request("POST", "/emotion/v1.0/recognize?%s" % params, imgJPG, headers)
             response = conn.getresponse()
@@ -85,9 +83,12 @@ class ImgRequest(object):
             print("[Errno {0}] {1}".format(e.errno, e.strerror))
             exit(1)
         people_info = json.loads(face_data)
-        if len(people_info)>0 :
+
+        goodHand = 3
+        if (len(people_info) > 0):
             goodHand = evaluateEmotion(people_info[0]['scores'])
-            player.setHumanGoodHand(goodHand)
+        player.setHumanGoodHand(goodHand)
+
         index = 0
         for p in people_info:
             rectangle = p['faceRectangle']
@@ -101,10 +102,33 @@ class ImgRequest(object):
         self.frame = frame
 
 def evaluateEmotion(scores):
-    return 0
+    neutral = scores['neutral']
+    happiness = scores['happiness']
+    surprise = scores['surprise']
+    sadness = scores['sadness']
+    contempt = scores['contempt']
+    disgust = scores['disgust']
+    anger = scores['anger']
+    fear = scores['fear']
+    max_emotion = max(scores, key=scores.get)
+    max_score = scores[max_emotion]
+    if (max_score < 0.1):
+        return 3
+    if (happiness > 0.2):
+        speak("不要以为你要赢了！")
+        return 5
+    if (happiness > 0.2):
+        return 4
+    if (surprise > 0.1 and (anger > 0.2 or disgust > 0.2 or fear > 0.2 or contempt > 0.2)):
+        return 1
+    if (sadness > 0.2):
+        speak("你这个菜鸡！")
+        return 0
+    if (surprise > 0.2):
+        return 2;
+    return 3
 
 def transfer(card):
-
     #print("second", tmplisth, tmplistc)
     t=""
     color = ['A','B','C','D']
@@ -127,7 +151,7 @@ class player(object):
         self.cards = []
         self.sortedcards = []
         self.imgRequest = request_arg
-        self.humanGoodHand = 0.0
+        self.humanGoodHand = 3
         self.update = False
         self.db = db_arg
         self.dbcursor = dbcursor_arg
@@ -192,8 +216,10 @@ class player(object):
             selectstr = selectstr+transfer(card)+"%"
         self.dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
         rate = self.dbcursor.fetchall()[0][0]
-        print("computer rate  ",rate)
 
+        print("computer rate  ",rate)
+        if (self.humanGoodHand > 3):
+            return 0
         return 1
 
 
