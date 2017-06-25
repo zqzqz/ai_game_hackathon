@@ -191,9 +191,13 @@ class player(object):
         for card in self.sortedcards:
             selectstr = selectstr+transfer(card)+"%"
         self.dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
-        rate = self.dbcursor.fetchall()[0][0]
-        print("computer rate  ",rate)
-
+        rate = 0.5
+        if len(self.sortedcards) < 4:
+            rate_searched = self.dbcursor.fetchall()[0][0]
+            if rate_searched == None:
+                rate = rate_searched
+            print("computer rate  ",rate)
+        # do decision
         return 1
 
 
