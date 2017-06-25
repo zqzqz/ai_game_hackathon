@@ -12,7 +12,11 @@ import json
 import traceback
 from random import randint
 from judge import *
+import sqlite3
 
+#connect database
+db = sqlite3.connect("test.db")
+dbcursor = db.cursor()
 
 headers = {
     # Request headers
@@ -24,7 +28,8 @@ params = urllib.urlencode({
     # Request parameters
 })
 
-colorBGR = [(105, 140, 255), (255, 144, 30), (140, 199, 0), (60, 20, 220), (2, 255, 255)]
+colorBGR = [(255,0,0), (0,255,0), (0,0,255)]
+textBGR = (255,0,0)
 recThickness = 2
 
 try:
@@ -57,20 +62,15 @@ def addRectangle(img, rectangle, scores, index):
     addScores(img, scores, color, left, top - 5)
 
 def addScores(img, scores, color, x, y):
-    neutral = scores['neutral']
     happiness = scores['happiness']
-    scores.pop('neutral', None)
-    max_emotion = max(scores, key=scores.get)
-    max_score = scores[max_emotion]
-    if (max_score < 0.1):
-        max_emotion = 'neutral'
-        max_score = neutral
-    cv2.putText(img, max_emotion + ": " + str(max_score), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
+    cv2.putText(img, "happiness: " + str(happiness), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
 
 class ImgRequest(object):
 
-    def request(self, player):
+    def request(self):
+        pass
+	
         imgRGB = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
         ret, imgJPG = cv2.imencode(".jpg", imgRGB)
         # if (not ret):
@@ -85,14 +85,6 @@ class ImgRequest(object):
             print("[Errno {0}] {1}".format(e.errno, e.strerror))
             exit(1)
         people_info = json.loads(face_data)
-        if len(people_info)>0:
-            player.emotion["sadness"] = people_info[0]["scores"]["sadness"]
-            player.emotion["fear"] = people_info[0]["scores"]["fear"]
-            player.emotion["disgust"] = people_info[0]["scores"]["disgust"]
-            player.emotion["surprise"] = people_info[0]["scores"]["surprise"]
-            player.emotion["happiness"] = people_info[0]["scores"]["happiness"]
-            player.emotion["neutral"] = people_info[0]["scores"]["neutral"]
-            player.update = True
         index = 0
         for p in people_info:
             rectangle = p['faceRectangle']
@@ -102,8 +94,19 @@ class ImgRequest(object):
             index = index + 1
         cv2.imshow("requested", self.frame)
 
+
     def setFrame(self, frame):
         self.frame = frame
+
+def transfer(card):
+
+    #print("second", tmplisth, tmplistc)
+    t=""
+    color = ['A','B','C','D']
+    t+=color[card[0]]
+    num = ['0','0','2','3','4','5','6','7','8','9','0','j','q','k','a']
+    t+=num[card[1]]
+    return t
 
 def initial():
     global list
@@ -144,8 +147,23 @@ class player(object):
         global currentlist
         # print(currentlist)
         x = randint(0, len(currentlist) -1)
+	
         tmp = currentlist[x]
         del currentlist[x]
+        self.cards.append(tmp)
+
+        length = len(self.sortedcards)
+        for k in range(length):
+            if tmp[1] >= self.sortedcards[k][1]:
+                self.sortedcards.insert(k, tmp)
+                break
+        if length == len(self.sortedcards):
+            self.sortedcards.append(tmp)
+
+    def fetch1(self):
+	global fixlist
+	tmp = currentlist[0]
+        del currentlist[0]
         self.cards.append(tmp)
 
         length = len(self.sortedcards)
@@ -169,14 +187,20 @@ class player(object):
         else:
             # human fetch a card, analyze his emotion
             print("send photo as request")
-            self.imgRequest.request(self)
-            if self.update:
-                print (self.emotion)
+            self.imgRequest.request()
             return 1
 
     def auto_choice(self):  #use api here
+        #select computer's win rate from database
+        selectstr="%"
+        for card in self.sortedcards:
+            selectstr = selectstr+transfer(card)+"%"
+        dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
+        rate = dbcursor.fetchall()[0][0]
+        print("computer rate  ",rate)
+        
         return 1
-
+    
 
     def printcards(self):
         flag = True
@@ -219,6 +243,7 @@ def round(human, computer, round_num):
     win_flag = -1
     round_num = 0
 
+    setFixlist(r_int)
     currentlist = list
     computer.fetchFixed()
     human.fetchFixed()
@@ -231,6 +256,9 @@ def round(human, computer, round_num):
 
     print_cards(human, computer)
 
+    #computer calculate human's win rate
+    #computer.select_rival_rate(human)
+    
     if computer.cards[0][1] > human.cards[0][1]:
         order_flag = 0
         if computer.auto_choice()== False:
