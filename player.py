@@ -188,6 +188,7 @@ def print_cards (human, computer):
 
 def round(human, computer):
     global list, currentlist
+    initial()
     win_flag = -1
     round_num = 0
 
