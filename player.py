@@ -14,10 +14,6 @@ from random import randint
 from judge import *
 import sqlite3
 
-#connect database
-db = sqlite3.connect("test.db")
-dbcursor = db.cursor()
-
 headers = {
     # Request headers
     'Content-Type': 'application/octet-stream',
@@ -117,24 +113,20 @@ def initial():
 
 class player(object):
 
-    def __init__(self, request_arg=None):
+    def __init__(self, request_arg=None, db_arg=None, dbcursor_arg=None):
         self.name = 'Unnamed'
         self.cards = []
         self.sortedcards = []
         self.imgRequest = request_arg
-<<<<<<< HEAD
-        self.rivalrate = 0
-=======
         self.emotion = {"sadness": 0, "fear": 0, "disgust": 0, \
                         "surprise": 0, "happiness": 0, "neutral": 0}
         self.update = False
->>>>>>> d019ea65dda189479701ee90634f1f6482ac0328
+        self.db = db_arg
+        self.dbcursor = dbcursor_arg
 
     def setname(self, str):
         self.name = str
 
-<<<<<<< HEAD
-=======
     def fetchFixed(self):
         global fixList
         nextCard = fixList[0]
@@ -149,7 +141,6 @@ class player(object):
         if length == len(self.sortedcards):
             self.sortedcards.append(nextCard)
 
->>>>>>> d019ea65dda189479701ee90634f1f6482ac0328
     def fetch(self):
         global currentlist
         # print(currentlist)
@@ -202,8 +193,8 @@ class player(object):
         selectstr="%"
         for card in self.sortedcards:
             selectstr = selectstr+transfer(card)+"%"
-        dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
-        rate = dbcursor.fetchall()[0][0]
+        self.dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
+        rate = self.dbcursor.fetchall()[0][0]
         print("computer rate  ",rate)
         
         return 1
@@ -250,7 +241,7 @@ def round(human, computer, round_num):
     win_flag = -1
     round_num = 0
 
-    setFixlist(r_int)
+    setFixList(round_num)
     currentlist = list
     computer.fetchFixed()
     human.fetchFixed()
@@ -260,7 +251,6 @@ def round(human, computer, round_num):
     # human.fetch()
     # computer.fetch()
     # human.fetch()
->>>>>>> d019ea65dda189479701ee90634f1f6482ac0328
 
     print_cards(human, computer)
 
@@ -285,15 +275,10 @@ def round(human, computer, round_num):
         return (win_flag, round_num)
 
     for k in range(3):
-<<<<<<< HEAD
-        computer.fetch1()
-        human.fetch1()
-=======
         computer.fetchFixed()
         human.fetchFixed()
         # computer.fetch()
         # human.fetch()
->>>>>>> d019ea65dda189479701ee90634f1f6482ac0328
         print_cards(human, computer)
         if not order_flag:
             order_flag = 0

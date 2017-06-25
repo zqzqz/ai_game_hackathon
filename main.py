@@ -28,9 +28,12 @@ def video_loop():
 
 def game():
     global frame
-    human = player(request_arg=imgRequest)
+    #connect database
+    db = sqlite3.connect("test.db")
+    dbcursor = db.cursor()
+    human = player(request_arg=imgRequest, db_arg=db, dbcursor_arg=dbcursor)
     human.setname('player')
-    computer = player()
+    computer = player(db_arg=db, dbcursor_arg=dbcursor)
     computer.setname('computer')
     r_int = 0
     while(True):
