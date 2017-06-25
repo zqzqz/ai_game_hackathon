@@ -24,8 +24,7 @@ params = urllib.urlencode({
     # Request parameters
 })
 
-colorBGR = [(255,0,0), (0,255,0), (0,0,255)]
-textBGR = (255,0,0)
+colorBGR = [(105, 140, 255), (255, 144, 30), (140, 199, 0), (60, 20, 220), (2, 255, 255)]
 recThickness = 2
 
 try:
@@ -58,9 +57,15 @@ def addRectangle(img, rectangle, scores, index):
     addScores(img, scores, color, left, top - 5)
 
 def addScores(img, scores, color, x, y):
+    neutral = scores['neutral']
     happiness = scores['happiness']
-    cv2.putText(img, "happiness: " + str(happiness), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
-
+    scores.pop('neutral', None)
+    max_emotion = max(scores, key=scores.get)
+    max_score = scores[max_emotion]
+    if (max_score < 0.1):
+        max_emotion = 'neutral'
+        max_score = neutral
+    cv2.putText(img, max_emotion + ": " + str(max_score), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
 class ImgRequest(object):
 
@@ -80,8 +85,9 @@ class ImgRequest(object):
             print("[Errno {0}] {1}".format(e.errno, e.strerror))
             exit(1)
         people_info = json.loads(face_data)
-        if len(people_infor)>0 :
-            emotion = evaluateEmotion(people_info[0]['scores'])
+        if len(people_info)>0 :
+            goodHand = evaluateEmotion(people_info[0]['scores'])
+            player.setHumanGoodHand(goodHand)
         index = 0
         for p in people_info:
             rectangle = p['faceRectangle']
@@ -95,7 +101,7 @@ class ImgRequest(object):
         self.frame = frame
 
 def evaluateEmotion(scores):
-    
+    return 0
 
 def transfer(card):
 
@@ -150,7 +156,7 @@ class player(object):
         global currentlist
         # print(currentlist)
         x = randint(0, len(currentlist) -1)
-    
+
         tmp = currentlist[x]
         del currentlist[x]
         self.cards.append(tmp)
@@ -187,9 +193,9 @@ class player(object):
         self.dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
         rate = self.dbcursor.fetchall()[0][0]
         print("computer rate  ",rate)
-        
+
         return 1
-    
+
 
     def printcards(self):
         flag = True
@@ -247,7 +253,7 @@ def round(human, computer, round_num):
 
     #computer calculate human's win rate
     #computer.select_rival_rate(human)
-    
+
     if computer.cards[0][1] > human.cards[0][1]:
         order_flag = 0
         if computer.auto_choice()== False:
