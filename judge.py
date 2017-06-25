@@ -80,7 +80,7 @@ def decidewinner(computer, human):
     for it in human.sortedcards:
         human_card_string += suit[it[0]] + " " + val[it[1]]+"\t"
     # print("human's cards:      %s" %(human_card_string))
-    
+
     # print("human: ", scorelist[human_score])
     # print("computer: ", scorelist[computer_score])
 
