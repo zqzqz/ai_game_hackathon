@@ -7,9 +7,8 @@
 * python2.7+
 * sqlite3
 * opencv
-* Microsoft emotion API
-* linux
-
+* Microsoft azure congnitive API
+* MacOS
 ## get started
 $ python main.py
 
