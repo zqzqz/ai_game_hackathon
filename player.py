@@ -83,7 +83,7 @@ class ImgRequest(object):
             player.emotion["surprise"] = people_info[0]["scores"]["surprise"]
             player.emotion["happiness"] = people_info[0]["scores"]["happiness"]
             player.emotion["neutral"] = people_info[0]["scores"]["neutral"]
-            print (player)
+            player.update = True
         index = 0
         for p in people_info:
             rectangle = p['faceRectangle']
@@ -111,6 +111,7 @@ class player(object):
         self.imgRequest = request_arg
         self.emotion = {"sadness": 0, "fear": 0, "disgust": 0, \
                         "surprise": 0, "happiness": 0, "neutral": 0}
+        self.update = False
     def setname(self, str):
         self.name = str
     def fetch(self):
@@ -143,6 +144,8 @@ class player(object):
             # human fetch a card, analyze his emotion
             print("send photo as request")
             self.imgRequest.request(self)
+            if self.update:
+                print (self.emotion)
             return 1
 
     def auto_choice(self):  #use api here
