@@ -64,8 +64,7 @@ def addScores(img, scores, color, x, y):
 
 class ImgRequest(object):
 
-    def request(self):
-        pass
+    def request(self, player):
     
         imgRGB = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
         ret, imgJPG = cv2.imencode(".jpg", imgRGB)
@@ -81,6 +80,8 @@ class ImgRequest(object):
             print("[Errno {0}] {1}".format(e.errno, e.strerror))
             exit(1)
         people_info = json.loads(face_data)
+        if len(people_infor)>0 :
+            emotion = evaluateEmotion(people_info[0]['scores'])
         index = 0
         for p in people_info:
             rectangle = p['faceRectangle']
@@ -90,9 +91,11 @@ class ImgRequest(object):
             index = index + 1
         cv2.imshow("requested", self.frame)
 
-
     def setFrame(self, frame):
         self.frame = frame
+
+def evaluateEmotion(scores):
+    
 
 def transfer(card):
 
@@ -118,14 +121,16 @@ class player(object):
         self.cards = []
         self.sortedcards = []
         self.imgRequest = request_arg
-        self.emotion = {"sadness": 0, "fear": 0, "disgust": 0, \
-                        "surprise": 0, "happiness": 0, "neutral": 0}
+        self.humanGoodHand = 0.0
         self.update = False
         self.db = db_arg
         self.dbcursor = dbcursor_arg
 
     def setname(self, str):
         self.name = str
+
+    def setHumanGoodHand(self, goodHand):
+        self.humanGoodHand = goodHand
 
     def fetchFixed(self):
         global fixList
@@ -171,7 +176,7 @@ class player(object):
         else:
             # human fetch a card, analyze his emotion
             print("send photo as request")
-            self.imgRequest.request()
+            self.imgRequest.request(self)
             return 1
 
     def auto_choice(self):  #use api here
