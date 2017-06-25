@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 from __future__ import print_function
+import os
 
 suit = ["梅花","黑桃","方片","红桃"]
 val  = ["-1","-1","2","3","4","5","6","7","8","9","10","J","Q","K","A"]
 scorelist=["大同花顺", "同花顺", "四条", "葫芦", "同花", "顺子", "三条", "两对", "一对", "高牌"]
 
 def speak(text):
-    print("hello world")
+    # print("hello world")
+    os.system("say -v Ting-Ting " + text)
 
 def flush(obj):
     tmp = obj.sortedcards[0][0]
@@ -86,7 +88,9 @@ def decidewinner(computer, human):
 
     if human_score == computer_score:
         return tie(score, computer, human)
-    elif human_score<computer_score:
+    elif human_score < computer_score:
+        speak("你居然赢了！再来一盘？")
         return 1
     else:
+        speak("哈哈，输了吧！菜鸡")
         return 0
