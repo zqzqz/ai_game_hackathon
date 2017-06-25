@@ -12,7 +12,11 @@ import json
 import traceback
 from random import randint
 from judge import *
+import sqlite3
 
+#connect database
+db = sqlite3.connect("test.db")
+dbcursor = db.cursor()
 
 headers = {
     # Request headers
@@ -37,6 +41,26 @@ except Exception as e:
 
 list = []
 currentlist=[]
+fixlist=[]
+
+def setFixlist(n):
+    global fixlist
+    fixlist=[]
+    if n==0:
+	#computer wins
+	fixlist=[(0,1),(2,9),(3,1),(2,7),(0,12),(1,6),(3,3),(1,11),(2,12),(1,5)]
+    elif n==1:
+	#tie but human slightly win
+        fixlist=[(1,8),(2,6),(2,9),(3,3),(0,5),(0,10),(0,11),(1,11),(0,2),(0,14)]
+    elif n==2:
+        #human wins
+        fixlist[(0,11),(1,3),(1,6),(2,8),(0,3),(0,5),(0,12),(2,3),(0,13),(0,8)]
+    else:
+    	for i in range(4):
+            for j in range(2,15):
+           	fixlist.append((i,j))
+	 
+	
 
 def addRectangle(img, rectangle, scores, index):
     color = colorBGR[index % len(colorBGR)]
@@ -48,20 +72,15 @@ def addRectangle(img, rectangle, scores, index):
     addScores(img, scores, color, left, top - 5)
 
 def addScores(img, scores, color, x, y):
-    neutral = scores['neutral']
     happiness = scores['happiness']
-    scores.pop('neutral', None)
-    max_emotion = max(scores, key=scores.get)
-    max_score = scores[max_emotion]
-    if (max_score < 0.1):
-        max_emotion = 'neutral'
-        max_score = neutral
-    cv2.putText(img, max_emotion + ": " + str(max_score), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
+    cv2.putText(img, "happiness: " + str(happiness), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
 
 class ImgRequest(object):
 
-    def request(self, player):
+    def request(self):
+        pass
+	
         imgRGB = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
         ret, imgJPG = cv2.imencode(".jpg", imgRGB)
         # if (not ret):
@@ -76,14 +95,6 @@ class ImgRequest(object):
             print("[Errno {0}] {1}".format(e.errno, e.strerror))
             exit(1)
         people_info = json.loads(face_data)
-        if len(people_info)>0:
-            player.emotion["sadness"] = people_info[0]["scores"]["sadness"]
-            player.emotion["fear"] = people_info[0]["scores"]["fear"]
-            player.emotion["disgust"] = people_info[0]["scores"]["disgust"]
-            player.emotion["surprise"] = people_info[0]["scores"]["surprise"]
-            player.emotion["happiness"] = people_info[0]["scores"]["happiness"]
-            player.emotion["neutral"] = people_info[0]["scores"]["neutral"]
-            player.update = True
         index = 0
         for p in people_info:
             rectangle = p['faceRectangle']
@@ -93,8 +104,19 @@ class ImgRequest(object):
             index = index + 1
         cv2.imshow("requested", self.frame)
 
+
     def setFrame(self, frame):
         self.frame = frame
+
+def transfer(card):
+
+    #print("second", tmplisth, tmplistc)
+    t=""
+    color = ['A','B','C','D']
+    t+=color[card[0]]
+    num = ['0','0','2','3','4','5','6','7','8','9','0','j','q','k','a']
+    t+=num[card[1]]
+    return t
 
 def initial():
     global list
@@ -109,17 +131,32 @@ class player(object):
         self.cards = []
         self.sortedcards = []
         self.imgRequest = request_arg
-        self.emotion = {"sadness": 0, "fear": 0, "disgust": 0, \
-                        "surprise": 0, "happiness": 0, "neutral": 0}
-        self.update = False
+        self.rivalrate = 0
+
     def setname(self, str):
         self.name = str
+
     def fetch(self):
         global currentlist
         # print(currentlist)
         x = randint(0, len(currentlist) -1)
+	
         tmp = currentlist[x]
         del currentlist[x]
+        self.cards.append(tmp)
+
+        length = len(self.sortedcards)
+        for k in range(length):
+            if tmp[1] >= self.sortedcards[k][1]:
+                self.sortedcards.insert(k, tmp)
+                break
+        if length == len(self.sortedcards):
+            self.sortedcards.append(tmp)
+
+    def fetch1(self):
+	global fixlist
+	tmp = currentlist[0]
+        del currentlist[0]
         self.cards.append(tmp)
 
         length = len(self.sortedcards)
@@ -143,14 +180,20 @@ class player(object):
         else:
             # human fetch a card, analyze his emotion
             print("send photo as request")
-            self.imgRequest.request(self)
-            if self.update:
-                print (self.emotion)
+            self.imgRequest.request()
             return 1
 
     def auto_choice(self):  #use api here
+        #select computer's win rate from database
+        selectstr="%"
+        for card in self.sortedcards:
+            selectstr = selectstr+transfer(card)+"%"
+        dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
+        rate = dbcursor.fetchall()[0][0]
+        print("computer rate  ",rate)
+        
         return 1
-
+    
 
     def printcards(self):
         flag = True
@@ -186,19 +229,24 @@ def print_cards (human, computer):
     human.printcards()
     print()
 
-def round(human, computer):
-    global list, currentlist
+def round(human, computer, r_int):
+    global currentlist
     win_flag = -1
     round_num = 0
 
+    setFixlist(r_int)
     currentlist = list
-    computer.fetch()
-    human.fetch()
-    computer.fetch()
-    human.fetch()
+    computer.fetch1()
+    human.fetch1()
+    computer.fetch1()
+
+    human.fetch1()
 
     print_cards(human, computer)
 
+    #computer calculate human's win rate
+    #computer.select_rival_rate(human)
+    
     if computer.cards[0][1] > human.cards[0][1]:
         order_flag = 0
         if computer.auto_choice()== False:
@@ -217,8 +265,8 @@ def round(human, computer):
         return (win_flag, round_num)
 
     for k in range(3):
-        computer.fetch()
-        human.fetch()
+        computer.fetch1()
+        human.fetch1()
         print_cards(human, computer)
         if not order_flag:
             order_flag = 0
