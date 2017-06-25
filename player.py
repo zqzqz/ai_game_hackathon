@@ -41,10 +41,13 @@ fixList = []
 def setFixList(n):
     global fixList
     if n==1:
-        fixList = [(0,1), (2,9), (3,1), (2,7), (0,12), (1,6), (3,3), (1,11), (2,12), (1,5)]
+        # computer win, counter bluff
+        fixList = [(2,9), (0,4), (3,1), (2,7), (0,12), (1,6), (2,12), (1,11), (3,3), (1,5)]
     elif n==2:
+        # normal
         fixList = [(1,8), (2,6), (2,9), (3,3), (0,5), (0,10), (0,11), (1,11), (0,2), (0,14)]
     elif n==3:
+        # human win, bluff
         fixList = [(0,11), (1,3), (1,6), (2,8), (0,3), (0,5), (0,12), (2,3), (0,13), (0,8)]
 
 def addRectangle(img, rectangle, scores, index):
@@ -216,11 +219,26 @@ class player(object):
         for card in self.sortedcards:
             selectstr = selectstr+transfer(card)+"%"
         self.dbcursor.execute("select avg(rate) from cardtable where value like \'"+selectstr+"\'")
-        rate = self.dbcursor.fetchall()[0][0]
+        rate = 0.5
+        if len(self.sortedcards) < 4:
+            rate_searched = self.dbcursor.fetchall()[0][0]
+            if rate_searched == None:
+                rate = rate_searched
+            print("computer rate  ",rate)
+        # do decision
 
         print("computer rate  ",rate)
-        if (self.humanGoodHand > 3):
+        
+        if (self.humanGoodHand > 4):
             return 0
+        elif (self.humanGoodHand < 2):
+            return 1
+        else:
+            score = rate * self.humanGoodHand
+            if score > 1.5:
+                return 1
+            else:
+                return 0
         return 1
 
 
