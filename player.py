@@ -54,7 +54,7 @@ def addScores(img, scores, color, x, y):
 
 class ImgRequest(object):
 
-    def request(self):
+    def request(self, player):
         imgRGB = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
         ret, imgJPG = cv2.imencode(".jpg", imgRGB)
         # if (not ret):
@@ -69,6 +69,14 @@ class ImgRequest(object):
             print("[Errno {0}] {1}".format(e.errno, e.strerror))
             exit(1)
         people_info = json.loads(face_data)
+        if len(people_info)>0:
+            player.emotion["sadness"] = people_info[0]["scores"]["sadness"]
+            player.emotion["fear"] = people_info[0]["scores"]["fear"]
+            player.emotion["disgust"] = people_info[0]["scores"]["disgust"]
+            player.emotion["surprise"] = people_info[0]["scores"]["surprise"]
+            player.emotion["happiness"] = people_info[0]["scores"]["happiness"]
+            player.emotion["neutral"] = people_info[0]["scores"]["neutral"]
+            print (player)
         index = 0
         for p in people_info:
             rectangle = p['faceRectangle']
@@ -94,7 +102,8 @@ class player(object):
         self.cards = []
         self.sortedcards = []
         self.imgRequest = request_arg
-
+        self.emotion = {"sadness": 0, "fear": 0, "disgust": 0, \
+                        "surprise": 0, "happiness": 0, "neutral": 0}
     def setname(self, str):
         self.name = str
     def fetch(self):
@@ -126,7 +135,7 @@ class player(object):
         else:
             # human fetch a card, analyze his emotion
             print("send photo as request")
-            self.imgRequest.request()
+            self.imgRequest.request(self)
             return 1
 
     def auto_choice(self):  #use api here

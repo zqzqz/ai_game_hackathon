@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+
 import sqlite3
 from judge import *
 from random import *
@@ -5,7 +8,7 @@ import time
 
 tmplisth=[]
 tmplistc=[]
-cx = sqlite3.connect("d:\\test.db")
+cx = sqlite3.connect("./test.db")
 cu = cx.cursor()
 def dbset():
     pass
@@ -133,7 +136,7 @@ def train():
     human.setname('player')
     computer = player()
     computer.setname('computer')
-    for i in range(20000):
+    for i in range(200000):
         print(i)
         initial() #初始化卡牌
         win_flag= round(human, computer)  #一个回合

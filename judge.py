@@ -62,7 +62,7 @@ def tie(score, computer, human):
 
 def decidewinner(computer, human):
     # return 1 when human wins
-    print("### sorted cards")
+    # print("### sorted cards")
     # print(computer.sortedcards)
     # print(human.sortedcards)
     human_score = score(human)
@@ -73,13 +73,13 @@ def decidewinner(computer, human):
     # explicitly show the all cards of computer and human
     for it in computer.sortedcards:
         computer_card_string += suit[it[0]] + " " + val[it[1]]+"\t"
-    print("computer's cards:   %s" %(computer_card_string))
+    # print("computer's cards:   %s" %(computer_card_string))
     for it in human.sortedcards:
         human_card_string += suit[it[0]] + " " + val[it[1]]+"\t"
-    print("human's cards:      %s" %(human_card_string))
+    # print("human's cards:      %s" %(human_card_string))
     
-    print("human: ", scorelist[human_score])
-    print("computer: ", scorelist[computer_score])
+    # print("human: ", scorelist[human_score])
+    # print("computer: ", scorelist[computer_score])
 
     if human_score == computer_score:
         return tie(score, computer, human)
