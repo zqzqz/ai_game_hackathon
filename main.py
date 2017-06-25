@@ -54,5 +54,5 @@ if __name__ == '__main__':
     # cv2.resizeWindow('requested', windowSize[0], windowSize[1])
     game_thread = threading.Thread(group=None, target=game)
     game_thread.start()
-    #video_loop()
+    video_loop()
     # main()
