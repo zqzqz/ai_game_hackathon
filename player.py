@@ -66,7 +66,7 @@ class ImgRequest(object):
 
     def request(self):
         pass
-	
+    
         imgRGB = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
         ret, imgJPG = cv2.imencode(".jpg", imgRGB)
         # if (not ret):
@@ -145,23 +145,9 @@ class player(object):
         global currentlist
         # print(currentlist)
         x = randint(0, len(currentlist) -1)
-	
+    
         tmp = currentlist[x]
         del currentlist[x]
-        self.cards.append(tmp)
-
-        length = len(self.sortedcards)
-        for k in range(length):
-            if tmp[1] >= self.sortedcards[k][1]:
-                self.sortedcards.insert(k, tmp)
-                break
-        if length == len(self.sortedcards):
-            self.sortedcards.append(tmp)
-
-    def fetch1(self):
-	global fixlist
-	tmp = currentlist[0]
-        del currentlist[0]
         self.cards.append(tmp)
 
         length = len(self.sortedcards)

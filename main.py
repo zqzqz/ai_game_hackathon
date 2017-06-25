@@ -28,7 +28,6 @@ def video_loop():
 
 def game():
     global frame
-    #connect database
     db = sqlite3.connect("test.db")
     dbcursor = db.cursor()
     human = player(request_arg=imgRequest, db_arg=db, dbcursor_arg=dbcursor)
@@ -39,14 +38,14 @@ def game():
     while(True):
         r_int = r_int + 1
         x = raw_input(">>>: enter to begin")
-        print "============================================= " 
+        print "============================================= "
         print "### round ", r_int, " begins"
         win_flag, round_num = round(human, computer, r_int)
         if win_flag:
-            print "### human wins!" 
+            print "### human wins!"
         else:
             print "### computer wins!"
-        print "### number of rounds: ", round_num 
+        print "### number of rounds: ", round_num
         human.reset()
         computer.reset()
         # break
