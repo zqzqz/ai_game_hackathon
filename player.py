@@ -27,6 +27,11 @@ params = urllib.urlencode({
 colorBGR = [(105, 140, 255), (255, 144, 30), (140, 199, 0), (60, 20, 220), (2, 255, 255)]
 recThickness = 2
 
+discard_sarcasm = ["弃牌吧，少年！", "放弃是明智的选择！", "你居然放弃了！哈哈哈哈哈哈"]
+neutral_sarcasm = ["你居然有一张扑克脸", "面无表情，很厉害", "看来你是高手啊，面无表情"]
+happiness_sarcasm = ["不要以为你就要赢了！", "我不会让你得逞的", "你太得意了！"]
+
+
 try:
     conn = httplib.HTTPSConnection('api.cognitive.azure.cn')
 except Exception as e:
@@ -113,11 +118,11 @@ def evaluateEmotion(scores):
     disgust = scores['disgust']
     anger = scores['anger']
     fear = scores['fear']
-    if (max([happiness, surprise, sadness, contempt, disgust, anger, fear]) < 0.1):
-        speak("很好！你有一张扑克脸")
+    if (max([happiness, surprise, sadness, contempt, disgust, anger, fear]) < 0.05):
+        speak(random.choice(neutral_sarcasm))
         return 3
     if (happiness > 0.7):
-        speak("不要以为你要赢了！")
+        speak(random.choice(happiness_sarcasm))
         return 5
     if (happiness > 0.2):
         speak("你很有自信")
@@ -206,6 +211,7 @@ class player(object):
         print("Bid: a | Fold: b")
         x = raw_input(">>>: ")
         if x=='b':
+            speak(random.choice(discard_sarcasm))
             return 0
         else:
             # human fetch a card, analyze his emotion
@@ -222,20 +228,20 @@ class player(object):
         rate = 0.5
         if len(self.sortedcards) < 4:
             rate_searched = self.dbcursor.fetchall()[0][0]
-            if rate_searched == None:
+            if rate_searched != None:
                 rate = rate_searched
             print("computer rate  ",rate)
         # do decision
 
         print("computer rate  ",rate)
-        
+        print("humanGoodHand: ", self.humanGoodHand)
         if (self.humanGoodHand > 4):
             return 0
         elif (self.humanGoodHand < 2):
             return 1
         else:
             score = rate * self.humanGoodHand
-            if score > 1.5:
+            if score > 1.0:
                 return 1
             else:
                 return 0
@@ -278,21 +284,23 @@ def print_cards (human, computer):
 
 def round(human, computer, round_num):
     global list, currentlist
-    # initial()
+    initial()
     setFixList(round_num)
     win_flag = -1
-    round_num = 0
+    term_num = 0
 
-    setFixList(round_num)
     currentlist = list
-    computer.fetchFixed()
-    human.fetchFixed()
-    computer.fetchFixed()
-    human.fetchFixed()
-    # computer.fetch()
-    # human.fetch()
-    # computer.fetch()
-    # human.fetch()
+    
+    if round_num <4:
+        computer.fetchFixed()
+        human.fetchFixed()
+        computer.fetchFixed()
+        human.fetchFixed()
+    else:
+        computer.fetch()
+        human.fetch()
+        computer.fetch()
+        human.fetch()
 
     print_cards(human, computer)
 
@@ -312,15 +320,17 @@ def round(human, computer, round_num):
         elif computer.auto_choice()== False :
             win_flag = 1
 
-    round_num+=1
+    term_num+=1
     if win_flag >=0 :
         return (win_flag, round_num)
 
     for k in range(3):
-        computer.fetchFixed()
-        human.fetchFixed()
-        # computer.fetch()
-        # human.fetch()
+        if round_num<4:
+            computer.fetchFixed()
+            human.fetchFixed()
+        else:
+            computer.fetch()
+            human.fetch()
         print_cards(human, computer)
         if not order_flag:
             order_flag = 0
@@ -335,7 +345,7 @@ def round(human, computer, round_num):
             elif computer.auto_choice() == False:
                 win_flag = 1
 
-        round_num += 1
+        term_num += 1
         if win_flag >= 0:
             return (win_flag, round_num)
 

@@ -2,10 +2,15 @@
 # -*- coding:utf-8 -*-
 from __future__ import print_function
 import os
+import random
 
 suit = ["梅花","黑桃","方片","红桃"]
 val  = ["-1","-1","2","3","4","5","6","7","8","9","10","J","Q","K","A"]
 scorelist=["大同花顺", "同花顺", "四条", "葫芦", "同花", "顺子", "三条", "两对", "一对", "高牌"]
+
+human_win_sarcasm = ["你居然赢了！这不可能！", "你居然赢了！再来一盘？", "我不服，再来一盘"]
+computer_win_sarcasm = ["哈哈！输了吧", "你不可能战胜我的！认命吧", "输给我是正常的"]
+
 
 def speak(text):
     # print("hello world")
@@ -89,8 +94,8 @@ def decidewinner(computer, human):
     if human_score == computer_score:
         return tie(score, computer, human)
     elif human_score < computer_score:
-        speak("你居然赢了！再来一盘？")
+        speak(random.choice(human_win_sarcasm))
         return 1
     else:
-        speak("哈哈，输了吧！菜鸡")
+        speak(random.choice(computer_win_sarcasm))
         return 0
