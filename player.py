@@ -28,7 +28,7 @@ colorBGR = [(105, 140, 255), (255, 144, 30), (140, 199, 0), (60, 20, 220), (2, 2
 recThickness = 2
 
 discard_sarcasm = ["弃牌吧，少年！", "放弃是明智的选择！", "你居然放弃了！哈哈哈哈哈哈"]
-neutral_sarcasm = ["你居然有一张扑克脸", "面无表情，很厉害", "看来你是高手啊，面无表情"]
+neutral_sarcasm = ["你居然有一张扑克脸", "面无表情，很厉害", "看来是高手，面无表情"]
 happiness_sarcasm = ["不要以为你就要赢了！", "我不会让你得逞的", "你太得意了！"]
 
 
@@ -121,19 +121,20 @@ def evaluateEmotion(scores):
     if (max([happiness, surprise, sadness, contempt, disgust, anger, fear]) < 0.05):
         speak(random.choice(neutral_sarcasm))
         return 3
-    if (happiness > 0.7):
+    if (happiness > 0.9):
         speak(random.choice(happiness_sarcasm))
         return 5
-    if (happiness > 0.2):
-        speak("你很有自信")
+    if (happiness > 0.7):
+        speak("看你的表情很有自信")
         return 4
-    if (surprise > 0.1 and (anger > 0.15 or disgust > 0.2 or fear > 0.2 or contempt > 0.2)):
+    if (anger > 0.15 or disgust > 0.2 or fear > 0.2 or contempt > 0.2):
         speak("惊不惊喜？意不意外？")
         return 1
     if (sadness > 0.2):
-        speak("你这个菜鸡！")
+        speak("怎么这么伤心？你这个菜鸡！")
         return 0
     if (surprise > 0.2):
+        speak("惊不惊喜？意不意外？")
         return 2;
     return 3
 
