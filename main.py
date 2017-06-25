@@ -38,7 +38,7 @@ def game():
         x = raw_input(">>>: enter to begin")
         print "============================================= " 
         print "### round ", r_int, " begins"
-        win_flag, round_num = round(human, computer)
+        win_flag, round_num = round(human, computer, r_int)
         if win_flag:
             print "### human wins!" 
         else:
@@ -54,5 +54,5 @@ if __name__ == '__main__':
     # cv2.resizeWindow('requested', windowSize[0], windowSize[1])
     game_thread = threading.Thread(group=None, target=game)
     game_thread.start()
-    video_loop()
+    #video_loop()
     # main()
